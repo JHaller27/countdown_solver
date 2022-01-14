@@ -1,6 +1,5 @@
 import functools
 from multiprocessing import Pool
-import sys
 import itertools
 from typing import Union
 from my_queue import Queue
@@ -99,10 +98,7 @@ def solve_form(nums: list[int], form_str: str) -> list[tuple[str, int]]:
     return results
 
 
-def main():
-    target = int(sys.argv[1])
-    nums = [int(a) for a in sys.argv[2:]]
-
+def main(target: int, nums: list[int]):
     partial_solve = functools.partial(solve_form, nums)
 
     with Pool() as pool:
@@ -124,4 +120,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+
+    target = int(sys.argv[1])
+    nums = [int(a) for a in sys.argv[2:]]
+
+    main(target, nums)
