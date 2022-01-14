@@ -108,7 +108,7 @@ def main():
     for r in results:
         flat_results.extend(r)
 
-    for expr, result in sorted(flat_results, key=lambda r: abs(target - r[1])):
+    for expr, result in sorted(flat_results, key=lambda r: abs(target - r[1]), reverse=True):
         print(expr, '=', result, '(', abs(target-result), ')')
 
 
