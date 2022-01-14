@@ -3,6 +3,14 @@ from multiprocessing import Pool
 import itertools
 from typing import Union
 from my_queue import Queue
+from dataclasses import dataclass
+
+
+@dataclass
+class Result:
+    prefix: str
+    result: int
+    delta: int
 
 
 @functools.cache
@@ -98,16 +106,16 @@ def find_form_results(nums: list[int], form_str: str) -> list[tuple[str, int]]:
     return results
 
 
-def solve(target: int, nums: list[int]) -> list[tuple[str, int, int]]:
+def solve(target: int, nums: list[int]) -> list[Result]:
     partial_find_results = functools.partial(find_form_results, nums)
 
     with Pool() as pool:
         results: list[list[tuple[str, int]]] = pool.map(partial_find_results, find_forms(len(nums)))
 
-    flat_results: list[tuple[str, int, int]] = list()
+    flat_results: list[Result] = list()
     for r_list in results:
         for r in r_list:
             diff = abs(target - r[1])
-            flat_results.append((r[0], r[1], diff))
+            flat_results.append(Result(prefix=r[0], result=r[1], delta=diff))
 
     return flat_results

@@ -7,17 +7,16 @@ nums = [int(a) for a in sys.argv[2:]]
 solver.solve(target, nums)
 
 results = solver.solve(target, nums)
-result_dict: dict[int, list[tuple[str, int, int]]] = dict()
+result_dict: dict[int, list[solver.Result]] = dict()
 
 min_diff = None
 for r in results:
-    diff = r[2]
-    result_dict.setdefault(diff, [])
-    result_dict[diff].append(r)
+    result_dict.setdefault(r.delta, [])
+    result_dict[r.delta].append(r)
 
-    if min_diff is None or diff < min_diff:
-        min_diff = diff
+    if min_diff is None or r.delta < min_diff:
+        min_diff = r.delta
 
 for r in result_dict[min_diff]:
-    for expr, result, diff in result_dict[min_diff]:
-        print(expr, '=', result, '(', diff, ')')
+    for r in result_dict[min_diff]:
+        print(r.prefix, '=', r.result, '(', r.delta, ')')
