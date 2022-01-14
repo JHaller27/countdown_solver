@@ -100,12 +100,9 @@ def main():
 
     results: list[list[tuple[str, int]]] = map(partial_solve, find_forms(len(nums)))
 
-    flat_results: list[tuple[str, int]] = []
-    for r in results:
-        flat_results.extend(r)
-
-    for expr, result in sorted(flat_results, key=lambda r: abs(target - r[1]), reverse=True):
-        print(expr, '=', result, '(', abs(target-result), ')')
+    for flat_result in results:
+        for expr, result in sorted(flat_result, key=lambda r: abs(target - r[1]), reverse=True):
+            print(expr, '=', result, '(', abs(target-result), ')')
 
 
 if __name__ == '__main__':
