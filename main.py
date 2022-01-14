@@ -18,4 +18,4 @@ for r in results:
         min_diff = r.delta
 
 for r in result_dict[min_diff]:
-    print(r.prefix, '=', r.result, '(', r.delta, ')')
+    print(" ".join(map(str, r.operations)), '=', r.result, '(', r.delta, ')')
