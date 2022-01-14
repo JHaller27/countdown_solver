@@ -98,11 +98,7 @@ def main():
 
     partial_solve = functools.partial(solve_form, nums)
 
-    results: list[list[tuple[str, int]]] = []
-
-    for form_str in find_forms(len(nums)):
-        r = partial_solve(form_str)
-        results.append(r)
+    results: list[list[tuple[str, int]]] = map(partial_solve, find_forms(len(nums)))
 
     flat_results: list[tuple[str, int]] = []
     for r in results:
