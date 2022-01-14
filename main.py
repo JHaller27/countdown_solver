@@ -1,4 +1,5 @@
 import functools
+from multiprocessing import Pool
 import sys
 import itertools
 from typing import Union
@@ -98,13 +99,21 @@ def main():
 
     partial_solve = functools.partial(solve_form, nums)
 
-    results: list[list[tuple[str, int]]] = map(partial_solve, find_forms(len(nums)))
+    with Pool() as pool:
+        results: list[list[tuple[str, int]]] = pool.map(partial_solve, find_forms(len(nums)))
 
-    flat_results: list[tuple[str, int]] = []
-    for r in results:
-        flat_results.extend(r)
+    min_diff = None
+    result_dict: dict[int, list[tuple[str, int]]] = dict()
+    for r_list in results:
+        for r in r_list:
+            diff = abs(target - r[1])
+            if min_diff is None or diff < min_diff:
+                min_diff = diff
 
-    for expr, result in sorted(flat_results, key=lambda r: abs(target - r[1]), reverse=True):
+            result_dict.setdefault(diff, list())
+            result_dict[diff].append(r)
+
+    for expr, result in result_dict[min_diff]:
         print(expr, '=', result, '(', abs(target-result), ')')
 
 
