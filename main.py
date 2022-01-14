@@ -75,26 +75,40 @@ def solve(queue: Queue[Union[str, int]], depth: int = 0) -> int:
         return op1 ** op2
 
 
+def solve_form(nums: list[int], form_str: str) -> list[tuple[str, int]]:
+    results: list[tuple[str, int]] = []
+
+    form = form_str.split()
+    for filled_form in fill_form(form, nums, '+-*/'):
+        term_queue = Queue(filled_form)
+        result = solve(term_queue)
+
+        if result is None:
+            continue
+
+        expr_str = ' '.join([str(t) for t in filled_form])
+        results.append((expr_str, result))
+
+    return results
+
+
 def main():
     target = int(sys.argv[1])
     nums = [int(a) for a in sys.argv[2:]]
 
-    results: list[tuple[str, int]] = []
+    partial_solve = functools.partial(solve_form, nums)
+
+    results: list[list[tuple[str, int]]] = []
 
     for form_str in find_forms(len(nums)):
-        print(form_str)
-        form = form_str.split()
-        for filled_form in fill_form(form, nums, '+-*/'):
-            term_queue = Queue(filled_form)
-            result = solve(term_queue)
+        r = partial_solve(form_str)
+        results.append(r)
 
-            if result is None:
-                continue
+    flat_results: list[tuple[str, int]] = []
+    for r in results:
+        flat_results.extend(r)
 
-            expr_str = ' '.join([str(t) for t in filled_form])
-            results.append((expr_str, result))
-
-    for expr, result in sorted(results, key=lambda r: abs(target - r[1])):
+    for expr, result in sorted(flat_results, key=lambda r: abs(target - r[1])):
         print(expr, '=', result, '(', abs(target-result), ')')
 
 
