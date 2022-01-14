@@ -1,22 +1,22 @@
 import functools
 from multiprocessing import Pool
 import itertools
-from typing import Union
+from typing import Union, Optional
 from my_queue import Queue
 from dataclasses import dataclass
 
 
 @dataclass
 class Result:
-    prefix: str
+    operations: list[str]
     result: int
     delta: int
 
 
 @functools.cache
-def find_forms(n: int) -> list[str]:
+def find_forms(n: int) -> set[str]:
     if n == 1:
-        return ['x']
+        return {'x'}
 
     forms = set()
     for m in range(1, n):
@@ -28,16 +28,16 @@ def find_forms(n: int) -> list[str]:
     return forms
 
 
-def fill_form(form: list[str], nums: list[int], ops: list[str]) -> list[list[Union[int, str]]]:
+def fill_form(form: list[str], nums: list[int], ops: str) -> Optional[list[list[Union[int, str]]]]:
     filled_forms = []
 
     for op_ordering in itertools.product(ops, repeat=len(nums) - 1):
         # If all ops are + or all ops are *, order of nums does not matter
-        num_permuations = [nums]
+        num_permutations = [nums]
         if not (all([op == '+' for op in op_ordering]) or all([op == '*' for op in op_ordering])):
-            num_permuations = itertools.permutations(nums, len(nums))
+            num_permutations = itertools.permutations(nums, len(nums))
 
-        for num_ordering in num_permuations:
+        for num_ordering in num_permutations:
             op_itr = iter(op_ordering)
             num_itr = iter(num_ordering)
 
@@ -53,7 +53,7 @@ def fill_form(form: list[str], nums: list[int], ops: list[str]) -> list[list[Uni
     return filled_forms
 
 
-def resolve_form(queue: Queue[Union[str, int]], depth: int = 0) -> int:
+def resolve_form(queue: Queue[Union[str, int]], depth: int = 0) -> Optional[int]:
     curr = queue.pop()
 
     if isinstance(curr, int):
@@ -78,13 +78,11 @@ def resolve_form(queue: Queue[Union[str, int]], depth: int = 0) -> int:
             return None
         return op1 // op2
 
-    if curr == '^':
-        assert False, "Power operation is not supported"
-        return op1 ** op2
+    raise RuntimeError(f"Unrecognized term: '{curr}'")
 
 
-def find_form_results(nums: list[int], form_str: str) -> list[tuple[str, int]]:
-    results: list[tuple[str, int]] = []
+def find_form_results(nums: list[int], form_str: str) -> list[tuple[list[str], int]]:
+    results: list[tuple[list[str], int]] = []
 
     seen = set()
     form = form_str.split()
@@ -100,8 +98,7 @@ def find_form_results(nums: list[int], form_str: str) -> list[tuple[str, int]]:
         if result is None:
             continue
 
-        expr_str = ' '.join([str(t) for t in filled_form])
-        results.append((expr_str, result))
+        results.append((filled_form, result))
 
     return results
 
@@ -110,12 +107,12 @@ def solve(target: int, nums: list[int]) -> list[Result]:
     partial_find_results = functools.partial(find_form_results, nums)
 
     with Pool() as pool:
-        results: list[list[tuple[str, int]]] = pool.map(partial_find_results, find_forms(len(nums)))
+        results: list[list[tuple[list[str], int]]] = pool.map(partial_find_results, find_forms(len(nums)))
 
     flat_results: list[Result] = list()
     for r_list in results:
         for r in r_list:
             diff = abs(target - r[1])
-            flat_results.append(Result(prefix=r[0], result=r[1], delta=diff))
+            flat_results.append(Result(operations=r[0], result=r[1], delta=diff))
 
     return flat_results
