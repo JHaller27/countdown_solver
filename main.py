@@ -79,8 +79,14 @@ def solve(queue: Queue[Union[str, int]], depth: int = 0) -> int:
 def solve_form(nums: list[int], form_str: str) -> list[tuple[str, int]]:
     results: list[tuple[str, int]] = []
 
+    seen = set()
     form = form_str.split()
     for filled_form in fill_form(form, nums, '+-*/'):
+        key = ' '.join([str(t) for t in filled_form])
+        if key in seen:
+            continue
+        seen.add(key)
+
         term_queue = Queue(filled_form)
         result = solve(term_queue)
 
